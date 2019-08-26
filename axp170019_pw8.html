@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Geocoding Service - PW8 WPL 6314.002 </title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+
+       
+      #map {
+        height: 100%;
+      }
+     
+
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #floating-panel {
+        position: absolute;
+        top: 10px;
+        left: 25%;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+        text-align: center;
+        font-family: 'Roboto','sans-serif';
+        line-height: 30px;
+        padding-left: 10px;
+      }
+      
+    </style>
+  </head>
+  <body>
+    
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBi_JTzVqM5i25N6YLkEnn81lCxKj2BtdQ&callback=initMap&libraries=places">
+    </script>
+    
+    <div id="floating-panel">
+      <input id="address" type="textbox" value="">
+      <input id="submit" type="button" value="Search">
+    </div>
+	
+    <div id="map"></div>
+	
+    <script>
+	  var map;
+	  var service;
+	  var infowindow;
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 15,
+          center: {lat: 32.7767, lng: -96.7970}
+        });
+
+        infowindow = new google.maps.InfoWindow();
+        var geocoder = new google.maps.Geocoder();
+
+        document.getElementById('submit').addEventListener('click', function() {
+          geocodeAddress(geocoder, map);
+        });
+      }
+		
+	  function geocodeAddress(geocoder, resultsMap) {
+        var add = document.getElementById('address').value;
+        geocoder.geocode({'address': add}, function(results, status) {
+          if (status === 'OK') {
+            resultsMap.setCenter(results[0].geometry.location);
+            
+
+	        var req = {
+		    location: results[0].geometry.location,
+		    radius: '1500',
+		    type: ['restaurant']
+			};
+
+			service = new google.maps.places.PlacesService(map);
+			service.nearbySearch(req, callback);
+          } else {
+            alert('Invalid Address: ' + status);
+          }
+        });
+      }
+	  
+      function callback(results, status) {
+		  if (status == google.maps.places.PlacesServiceStatus.OK) {
+		    for (var k = 0; k < results.length; k++) {
+		      var place = results[k];
+		      createMarker(results[k]);
+		    }
+		  }
+		}
+
+	  function createMarker(place) {
+        var marker_set = new google.maps.Marker({
+          map: map,
+          position: place.geometry.location
+        });
+
+        google.maps.event.addListener(marker_set, 'click', function() {
+          infowindow.setContent(place.name);
+          infowindow.open(map, this);
+        });
+      }	
+
+    </script>
+	
+  </body>
+</html>
